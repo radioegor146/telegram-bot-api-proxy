@@ -1,0 +1,38 @@
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    access_log off;
+
+    server {
+        listen 80;
+        server_name _;
+
+        client_max_body_size 50m;
+
+        location /${SECRET_PREFIX}/ {
+            proxy_pass https://api.telegram.org/;
+
+            proxy_http_version 1.1;
+            proxy_set_header Host api.telegram.org;
+
+            proxy_ssl_server_name on;
+            proxy_ssl_verify on;
+            proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+
+            proxy_connect_timeout 10s;
+            proxy_read_timeout 120s;
+            proxy_send_timeout 120s;
+
+            proxy_request_buffering off;
+        }
+
+        location / {
+            return 404;
+        }
+    }
+}
